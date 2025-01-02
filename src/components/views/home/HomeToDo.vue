@@ -1,6 +1,6 @@
 <template>
-  <div style="width: 380px; margin: auto">
-    <h1 class="text-white text-center pt-5 fw-bold">ToDo List</h1>
+  <div style="width: 380px; margin: auto" class="py-5">
+    <h1 class="text-white text-center fw-bold">ToDo List</h1>
 
     <form @submit.prevent="onClickAdd()">
       <div class="d-flex mt-3">
@@ -10,7 +10,9 @@
           placeholder="Add new task"
           v-model="state.task_name"
         />
-        <button class="btn btn-primary rounded-start-0">Add</button>
+        <button class="btn btn-primary rounded-start-0">
+          {{ state.selected_id == 0 ? "Add" : "Update" }}
+        </button>
       </div>
       <ul class="list-group mt-4">
         <li v-for="task in state.tasks" :key="task.id" class="list-group-item">
@@ -21,34 +23,32 @@
               >{{ task.id }}. {{ task.name }}</span
             >
             <div class="d-flex gap-2">
-              <a role="button" v-show="!task.is_completed" class="text-primary"
+              <a
+                role="button"
+                v-show="!task.is_completed"
+                class="text-primary"
+                @click="onClickEdit(task.name, task.id)"
                 ><i class="bi bi-pencil-square"></i
               ></a>
               <a role="button" class="text-danger"
                 ><i class="bi bi-trash"></i
               ></a>
-              <a role="button" v-show="!task.is_completed"
+              <a
+                role="button"
+                v-show="!task.is_completed"
+                @click="onClickComplete(task.id)"
                 ><i class="bi bi-check-circle text-success"></i
               ></a>
-              <a role="button" v-show="task.is_completed" class="text-warning"
+              <a
+                role="button"
+                v-show="task.is_completed"
+                class="text-warning"
+                @click="onClickCancel(task.id)"
                 ><i class="bi bi-x-circle"></i
               ></a>
             </div>
           </div>
         </li>
-        <!-- <li class="list-group-item">
-          <div class="d-flex justify-content-between">
-            <span class="fw-medium text-decoration-line-through"
-              >Go to school</span
-            >
-            <div class="d-flex gap-3">
-              <a role="button" class="text-danger"
-                ><i class="bi bi-trash"></i
-              ></a>
-              <a role="button"><i class="bi bi-x-circle"></i></a>
-            </div>
-          </div>
-        </li> -->
       </ul>
     </form>
   </div>
@@ -65,9 +65,46 @@ const state = reactive({
     { id: 4, name: "Go to USA", is_completed: true },
   ],
   task_name: "",
+  selected_id: 0,
 });
 
 const onClickAdd = () => {
-  alert(state.task_name);
+  if (state.selected_id == 0) {
+    let ids = state.tasks.map((item) => item.id);
+    let maxID = Math.max(...ids) + 1;
+
+    state.tasks.push({
+      id: maxID,
+      name: state.task_name,
+      is_completed: false,
+    });
+  } else {
+    let index = state.tasks.findIndex((item) => item.id == state.selected_id);
+    state.tasks[index].name = state.task_name;
+    state.selected_id = 0;
+  }
+  state.task_name = "";
+};
+
+const onClickComplete = (id) => {
+  // JS ES6
+
+  let index = state.tasks.findIndex((item) => item.id == id);
+  // console.log(index);
+  state.tasks[index].is_completed = true;
+};
+
+const onClickCancel = (id) => {
+  // JS ES6
+
+  let index = state.tasks.findIndex((item) => item.id == id);
+  // console.log(index);
+  state.tasks[index].is_completed = false;
+};
+
+const onClickEdit = (name, id) => {
+  // alert(name)
+  state.task_name = name;
+  state.selected_id = id;
 };
 </script>
