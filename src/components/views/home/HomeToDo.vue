@@ -15,7 +15,11 @@
         </button>
       </div>
       <ul class="list-group mt-4">
-        <li v-for="task in state.tasks" :key="task.id" class="list-group-item">
+        <li
+          v-for="task in homeStore.tasks"
+          :key="task.id"
+          class="list-group-item"
+        >
           <div class="d-flex justify-content-between">
             <span
               class="fw-medium"
@@ -30,7 +34,10 @@
                 @click="onClickEdit(task.name, task.id)"
                 ><i class="bi bi-pencil-square"></i
               ></a>
-              <a role="button" class="text-danger"
+              <a
+                role="button"
+                class="text-danger"
+                @click="onClickDelete(task.id)"
                 ><i class="bi bi-trash"></i
               ></a>
               <a
@@ -52,35 +59,38 @@
       </ul>
     </form>
   </div>
+  <HomeModalConfirm />
 </template>
 
 <script setup>
 import { reactive } from "vue";
+import HomeModalConfirm from "./HomeModalConfirm.vue";
+import { useHomeStore } from "@/stores/views/home_store";
+
+const homeStore = useHomeStore();
 
 const state = reactive({
-  tasks: [
-    { id: 1, name: "Go count down", is_completed: false },
-    { id: 2, name: "Go home", is_completed: true },
-    { id: 3, name: "Go to sleep", is_completed: false },
-    { id: 4, name: "Go to USA", is_completed: true },
-  ],
   task_name: "",
   selected_id: 0,
 });
 
 const onClickAdd = () => {
   if (state.selected_id == 0) {
-    let ids = state.tasks.map((item) => item.id);
-    let maxID = Math.max(...ids) + 1;
-
-    state.tasks.push({
+    let maxID = 1;
+    if (homeStore.tasks.length > 0) {
+      let ids = homeStore.tasks.map((item) => item.id);
+      maxID = Math.max(...ids) + 1;
+    }
+    homeStore.tasks.push({
       id: maxID,
       name: state.task_name,
       is_completed: false,
     });
   } else {
-    let index = state.tasks.findIndex((item) => item.id == state.selected_id);
-    state.tasks[index].name = state.task_name;
+    let index = homeStore.tasks.findIndex(
+      (item) => item.id == state.selected_id
+    );
+    homeStore.tasks[index].name = state.task_name;
     state.selected_id = 0;
   }
   state.task_name = "";
@@ -89,22 +99,27 @@ const onClickAdd = () => {
 const onClickComplete = (id) => {
   // JS ES6
 
-  let index = state.tasks.findIndex((item) => item.id == id);
+  let index = homeStore.tasks.findIndex((item) => item.id == id);
   // console.log(index);
-  state.tasks[index].is_completed = true;
+  homeStore.tasks[index].is_completed = true;
 };
 
 const onClickCancel = (id) => {
   // JS ES6
 
-  let index = state.tasks.findIndex((item) => item.id == id);
+  let index = homeStore.tasks.findIndex((item) => item.id == id);
   // console.log(index);
-  state.tasks[index].is_completed = false;
+  homeStore.tasks[index].is_completed = false;
 };
 
 const onClickEdit = (name, id) => {
   // alert(name)
   state.task_name = name;
   state.selected_id = id;
+};
+
+const onClickDelete = (id) => {
+  homeStore.selected_id = id;
+  homeStore.mdl_confirm.show();
 };
 </script>
